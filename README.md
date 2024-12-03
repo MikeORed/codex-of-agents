@@ -37,7 +37,8 @@ The project is structured to reflect **Clean/Hexagonal Architecture**, separatin
 ```plaintext
 root/
 │
-├── cdk/                    # AWS CDK infrastructure definitions
+├── bin/                    # Entry point for the CDK app
+├── infra/                  # AWS CDK infrastructure definitions
 ├── src/                    # Application source code
 │   ├── adapters/
 │   │   ├── primary/        # Interfaces for primary adapters (e.g., controllers)
@@ -45,18 +46,19 @@ root/
 │   │   └── repositories/   # Repository interfaces and implementations
 │   ├── application/        # Application-specific logic
 │   │   ├── use-cases/      # Use cases or application services
-│   │   ├── dto/            # Data Transfer Objects
+│   │   ├── dtos/           # Data Transfer Objects
 │   │   └── schemas/        # Validation schemas for API or UI data
 │   ├── domain/             # Core business entities and logic
 │   │   ├── entities/       # Entities like Document, Actor, Location, Agent
-│   │   ├── services/       # Domain services, e.g., SessionManager
-│   │   └── events/         # Domain events
-│   ├── shared/             # Shared utilities and helpers
-│   │   ├── config/         # Configuration files and environment variables
-│   │   ├── errors/         # Custom error classes
-│   │   └── utils/          # General utilities and helpers
-├── tests/                  # Jest and Postman tests
-├── types/                  # Shared types and interfaces
+│   │   ├── events/         # Domain events
+│   │   ├── repositories/   # Repository interfaces
+│   │   ├── schemas/        # Domain-specific schemas
+│   │   └── services/       # Domain services
+│   └── shared/             # Shared utilities and helpers
+│       ├── config/         # Configuration files and environment variables
+│       ├── errors/         # Custom error classes
+│       └── utils/          # General utilities and helpers
+├── test/                   # Jest tests
 └── README.md               # Project documentation
 ```
 
@@ -139,7 +141,7 @@ root/
 
 The project is inspired by and references concepts from the paper:
 
-**“LARP: Language-Agent Role-Play Framework for Open-World Simulations”**  
+**"LARP: Language-Agent Role-Play Framework for Open-World Simulations"**  
 _(Read the full paper here: [LARP Framework - arXiv](https://arxiv.org/abs/2312.17653))_
 
 ### **Key Concepts from the Paper**:
@@ -190,8 +192,9 @@ The project is designed to be deployed using **AWS CDK**. An example environment
 
 1. **Clone the Repository**: `git clone [repository-url]`
 2. **Install Dependencies**: `npm install`
-3. **Deploy with CDK**: `cdk deploy`
-4. **Run Tests**: `npm test` (Jest) / **Postman** tests can be imported via the provided collection.
+3. **Build the Project**: `npm run build`
+4. **Deploy with CDK**: `npm run cdk deploy`
+5. **Run Tests**: `npm test`
 
 ---
 
