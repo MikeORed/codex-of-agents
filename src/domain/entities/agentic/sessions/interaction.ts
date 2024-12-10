@@ -1,22 +1,19 @@
 import { Entity } from "../../base/entity";
-import { BaseAgent } from "../agents/base-agent";
-import { Tool } from "../tools/tool";
-
-export interface InteractionContent {
-  input: string;
-  output?: string;
-  toolCalls?: {
-    tool: Tool;
-    input: any;
-    output?: any;
-  }[];
-}
+import { BaseAgent, BaseAgentProps } from "../agents/base-agent";
+import {
+  InteractionContent,
+  InteractionType,
+  InteractionDirection,
+  ToolCall,
+} from "./interaction-types";
 
 export interface InteractionProps {
-  agent: BaseAgent<any>;  // The agent that owns this interaction
+  agent: BaseAgent<BaseAgentProps>; // The agent that owns this interaction
   content: InteractionContent;
   timestamp: string;
-  sessionId: string;  // The ID of the session this interaction belongs to
+  sessionId: string; // The ID of the session this interaction belongs to
+  type: InteractionType;
+  direction: InteractionDirection;
 }
 
 export class Interaction extends Entity<InteractionProps> {
@@ -41,26 +38,23 @@ export class Interaction extends Entity<InteractionProps> {
     return this.props.timestamp;
   }
 
-  public setOutput(output: string): void {
-    this.props.content.output = output;
+  public setText(text: string): void {
+    this.props.content.text = text;
     this.setUpdatedDate();
   }
 
-  public addToolCall(tool: Tool, input: any, output?: any): void {
-    if (!this.props.content.toolCalls) {
-      this.props.content.toolCalls = [];
-    }
-    this.props.content.toolCalls.push({ tool, input, output });
+  public setType(type: InteractionType): void {
+    this.props.type = type;
     this.setUpdatedDate();
   }
 
-  public setToolCallOutput(toolCallIndex: number, output: any): void {
-    if (
-      this.props.content.toolCalls &&
-      this.props.content.toolCalls[toolCallIndex]
-    ) {
-      this.props.content.toolCalls[toolCallIndex].output = output;
-      this.setUpdatedDate();
-    }
+  public setDirection(direction: InteractionDirection): void {
+    this.props.direction = direction;
+    this.setUpdatedDate();
+  }
+
+  public setToolCall(toolCall: ToolCall): void {
+    this.props.content.toolCall = toolCall;
+    this.setUpdatedDate();
   }
 }

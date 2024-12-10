@@ -1,12 +1,10 @@
 import { DocumentType as __DocumentType } from "@smithy/types";
 import { Tool, ToolProps } from "./tool";
 
-export interface SumToolProps extends ToolProps {
-  // Add SumTool-specific properties if needed
-}
+export interface SumToolProps extends ToolProps {}
 
 export class SumTool extends Tool {
-  private static inputSchema: __DocumentType = {
+  private static staticInputSchema: __DocumentType = {
     type: "object",
     properties: {
       operands: {
@@ -26,6 +24,7 @@ export class SumTool extends Tool {
     updated?: string
   ) {
     super(props, id, created, updated);
+    this.props.inputSchema = SumTool.staticInputSchema;
   }
 
   public async execute(input: any): Promise<number> {

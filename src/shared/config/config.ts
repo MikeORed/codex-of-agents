@@ -1,4 +1,4 @@
-import * as convict from "convict";
+import convict from "convict";
 
 export const config = convict({
   agentTableName: {
@@ -6,6 +6,12 @@ export const config = convict({
     format: String,
     default: "agentTableName",
     env: "AGENT_TABLE_NAME",
+  },
+  defaultConverseModelId: {
+    doc: "The default model to use for conversing",
+    format: String,
+    default: "amazon.nova-micro-v1:0",
+    env: "DEFAULT_CONVERSE_MODEL_ID",
   },
   environment: {
     doc: "The environmnt being deployed to {dev, sit, pre, or prod}",

@@ -1,4 +1,3 @@
-import { Agent } from "../entities/agentic/agents/agent";
 import {
   BaseAgent,
   BaseAgentProps,
@@ -9,6 +8,6 @@ export interface IAgentRepository
   extends IBaseRepository<BaseAgent<BaseAgentProps>> {
   findById(id: string): Promise<BaseAgent<BaseAgentProps> | null>;
   findAll(): Promise<BaseAgent<BaseAgentProps>[]>;
-  save(agent: Agent): Promise<void>;
+  save(agent: BaseAgent<BaseAgentProps>): Promise<void>;
   delete(id: string): Promise<void>;
 }
