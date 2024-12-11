@@ -64,12 +64,10 @@ export class SynchronousInMemoryChronicleExecutor
 
       try {
         // Execute the chapter
-        const agentResult = await agent.execute(
-          this.llmService, // Assuming chronicle has access to llmService
-          this.agentRepository, // Assuming chronicle has access to agentRepository
-          chapter.goal,
-          { ...(chapter.inputContext ?? {}), ...dependentContext }
-        );
+        const agentResult = await agent.execute(this.llmService, chapter.goal, {
+          ...(chapter.inputContext ?? {}),
+          ...dependentContext,
+        });
 
         // Mark the chapter as complete
         chapter.status = "complete";

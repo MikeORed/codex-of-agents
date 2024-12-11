@@ -36,9 +36,9 @@ export class Agent extends BaseAgent<AgentProps> {
 
   private generateSystemMessage(): string {
     const coreInstructions = `Instructions:${
-      this.props.supllementalInstructions &&
-      this.props.supllementalInstructions.length > 0
-        ? this.props.supllementalInstructions.map((ins) => "\n-" + ins).join()
+      this.props.supplementalInstructions &&
+      this.props.supplementalInstructions.length > 0
+        ? this.props.supplementalInstructions.map((ins) => "\n-" + ins).join()
         : ""
     }
         - Parse the goal and input context from the request.
@@ -71,8 +71,6 @@ export class Agent extends BaseAgent<AgentProps> {
 
   public async execute(
     llmService: LlmService,
-    agentRepository: IAgentRepository,
-    //sessionRepository: ISessionRepository,
     command: string | undefined,
     context: Record<string, any> | undefined
   ): Promise<Record<string, any>> {

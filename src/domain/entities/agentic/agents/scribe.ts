@@ -3,7 +3,6 @@ import { Chronicle } from "../chronicles/chronicle";
 import { Agent } from "./agent";
 import { ChronicleXmlMapper } from "../../../../adapters/secondary/xml/xml-chronicle-mapper";
 import { LlmService } from "../../../services/llm-service/llm-service";
-import { IAgentRepository } from "../../../repositories/agent.repository";
 import { config } from "../../../../shared/config";
 import { ConverseCommandInput } from "@aws-sdk/client-bedrock-runtime";
 
@@ -36,9 +35,9 @@ export class Scribe extends BaseAgent<ScribeProps> {
       .join("\n")}`;
 
     const coreInstructions = `Instructions:${
-      this.props.supllementalInstructions &&
-      this.props.supllementalInstructions.length > 0
-        ? this.props.supllementalInstructions.map((ins) => "\n-" + ins).join()
+      this.props.supplementalInstructions &&
+      this.props.supplementalInstructions.length > 0
+        ? this.props.supplementalInstructions.map((ins) => "\n-" + ins).join()
         : ""
     }
         - Parse the user's prompt and identify all entities and actions involved.
@@ -121,21 +120,5 @@ export class Scribe extends BaseAgent<ScribeProps> {
     } else {
       throw new Error("No valid content received from LLM response");
     }
-  }
-
-  public executeChronicle(chronicle: Chronicle): Promise<any> {
-    throw new Error("Method not implemented.");
-  }
-
-  public async execute(
-    llmService: LlmService,
-    agentRepository: IAgentRepository,
-    //sessionRepository: ISessionRepository,
-    command: string | undefined,
-    context: Record<string, any> | undefined
-  ): Promise<Record<string, any>> {
-    await this.generateChronicle(llmService, command, context);
-    //await this.executeChronicle(this._chronicle);
-    return {};
   }
 }

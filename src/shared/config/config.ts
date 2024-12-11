@@ -14,13 +14,13 @@ export const config = convict({
     env: "DEFAULT_CONVERSE_MODEL_ID",
   },
   environment: {
-    doc: "The environmnt being deployed to {dev, sit, pre, or prod}",
+    doc: "The environment being deployed to {dev, sit, pre, or prod}",
     format: String,
     default: "dev",
     env: "ENVIRONMENT",
   },
   stage: {
-    doc: "A modifier for the enviornment being deployed, should affect entity name prefixes",
+    doc: "A modifier for the environment being deployed, should affect entity name prefixes",
     format: String,
     default: "",
     env: "STAGE",

@@ -22,7 +22,7 @@ export const config = convict<IConfig>({
   stage: {
     doc: "Deployment stage name.",
     format: String,
-    default: "mike",
+    default: "",
     env: "STAGE",
   },
   defaultConverseModelId: {

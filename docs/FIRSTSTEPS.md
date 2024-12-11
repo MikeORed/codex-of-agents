@@ -2,7 +2,7 @@
 
 Welcome to the **Codex of Agents**! 🚀 This guide will help you get started with testing the newly introduced **Chronicle Executor** and **AWS Lambda function**. These steps will ensure you can effectively deploy and test your Lambda function using simple agents powered by LLMs.
 
-**NOTE**: My solution makes use of AWS Bedrock for executing it's flows, and while you're likely to stay in Free Tier for lambda, any use of Bedrock will cost money, so please review those costs prior to committing to executing this cose.
+**NOTE**: My solution makes use of AWS Bedrock for executing it's flows, and while you're likely to stay in Free Tier for lambda, any use of Bedrock will cost money, so please review those costs prior to committing to executing this code.
 
 ## 📋 Table of Contents
 
