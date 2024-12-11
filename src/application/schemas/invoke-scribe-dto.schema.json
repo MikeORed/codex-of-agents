@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "context": {
+      "description": "Optional context for the invocation"
+    },
+    "scribeId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The unique identifier of the Scribe to invoke"
+    },
+    "sessionId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Optional session ID if this invocation should be part of an existing session"
+    },
+    "command": {
+      "type": "string",
+      "description": "The command to execute"
+    }
+  },
+  "required": ["scribeId"],
+  "additionalProperties": false
+}
