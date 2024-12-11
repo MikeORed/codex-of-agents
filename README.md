@@ -200,4 +200,4 @@ The project is designed to be deployed using **AWS CDK**. An example environment
 
 ## 📬 **Contact**
 
-For more information or to discuss collaboration, feel free to reach out via [contact information].
+For more information or to discuss collaboration, feel free to reach out via mflanagansolutions@gmail.com.
