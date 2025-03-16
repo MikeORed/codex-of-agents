@@ -6,13 +6,16 @@ import { InvokeScribeUseCase } from "../../../application/use-cases/invoke-scrib
 import { validate } from "../../../shared/utils";
 import { AwsBedrockLlmService } from "../../secondary/llm-service/bedrock-llm-service";
 import { HardcodedAgentRepository } from "../../repositories/hardcoded/hardcoded-agent-repository";
+import { wrapper } from "../../../shared/wrapper/wrapper";
 
-export const handler = async (
+import { logger } from "../../../shared/monitor";
+
+const lambdaHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
-    console.log(JSON.stringify(event));
-    console.log(JSON.stringify(event.body));
+    logger.info(JSON.stringify(event));
+    logger.info(JSON.stringify(event.body));
     // Ensure the body exists
     if (!event.body) {
       return {
@@ -30,7 +33,7 @@ export const handler = async (
     try {
       dto = JSON.parse(event.body) as InvokeScribeDto;
     } catch (parseError) {
-      console.error("Error parsing request body:", parseError);
+      logger.error("Error parsing request body:", { parseError });
       return {
         statusCode: 400,
         body: JSON.stringify({ message: "Bad Request: Invalid JSON" }),
@@ -74,7 +77,7 @@ export const handler = async (
       },
     };
   } catch (error) {
-    console.error("Error processing request:", error);
+    logger.error("Error processing request:", { error });
     return {
       statusCode: 500,
       body: JSON.stringify({ message: "Internal Server Error" }),
@@ -85,3 +88,5 @@ export const handler = async (
     };
   }
 };
+
+export const handler = wrapper(lambdaHandler);

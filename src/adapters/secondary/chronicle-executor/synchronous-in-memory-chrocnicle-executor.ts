@@ -2,6 +2,7 @@ import { Chronicle } from "../../../domain/entities/agentic/chronicles/chronicle
 import { IChronicleExecutor } from "../../../domain/services/chronicle-executor/chronicle-executor";
 import { IAgentRepository } from "../../../domain/repositories/agent.repository";
 import { LlmService } from "../../../domain/services/llm-service/llm-service";
+import { logger } from "../../../shared/monitor";
 
 /**
  * Synchronous In-Memory Chronicle Executor.
@@ -38,7 +39,7 @@ export class SynchronousInMemoryChronicleExecutor
         break;
       }
 
-      console.log(`Executing chapter: ${chapter.id}`);
+      logger.info(`Executing chapter: ${chapter.id}`);
 
       // Grab the agent of the chapter
       const agent = chapter.targetAgent;
@@ -73,9 +74,9 @@ export class SynchronousInMemoryChronicleExecutor
         chapter.status = "complete";
         chapter.outputContext = agentResult;
         completedChapters.add(chapter.id);
-        console.log(`Chapter ${chapter.id} completed successfully.`);
+        logger.info(`Chapter ${chapter.id} completed successfully.`);
       } catch (error) {
-        console.error(`Error executing chapter ${chapter.id}:`, error);
+        logger.error(`Error executing chapter ${chapter.id}:`, { error });
         // Optionally, implement retry logic or mark the chapter as failed
         continue; // Skip to the next chapter
       }
@@ -96,7 +97,7 @@ export class SynchronousInMemoryChronicleExecutor
         return ch.dependencies.every((dep) => completedChapters.has(dep.id));
       });
 
-      console.log(
+      logger.info(
         `Newly available chapters: ${newlyAvailableChapters
           .map((ch) => ch.id)
           .join(", ")}`

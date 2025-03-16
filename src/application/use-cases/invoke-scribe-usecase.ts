@@ -4,6 +4,7 @@ import { Scribe } from "../../domain/entities/agentic/agents/scribe";
 import { LlmService } from "../../domain/services/llm-service/llm-service";
 import { IChronicleExecutor } from "../../domain/services/chronicle-executor/chronicle-executor";
 import { SynchronousInMemoryChronicleExecutor } from "../../adapters/secondary/chronicle-executor/synchronous-in-memory-chrocnicle-executor";
+import { logger } from "../../shared/monitor";
 
 export class InvokeScribeUseCase {
   private readonly chronicleExecutor: IChronicleExecutor;
@@ -49,10 +50,12 @@ export class InvokeScribeUseCase {
     try {
       await this.chronicleExecutor.executeChronicle(chronicle);
     } catch (error) {
-      console.error(`Error executing chronicle: ${JSON.stringify(error)}`);
+      logger.error(`Error executing chronicle: ${chronicle.id}`, { error });
       throw error; // Rethrow or handle accordingly
     }
 
-    console.log("Chronicle execution completed.", chronicle.chapters);
+    logger.info("Chronicle execution completed.", {
+      chapters: chronicle.chapters,
+    });
   }
 }

@@ -25,7 +25,7 @@ export class HardcodedAgentRepository implements IAgentRepository {
     const llmExecutionAgentProps: AgentProps = {
       name: "LLM Executor",
       description: "Simply Executes LLMs with a prompt",
-      supllementalInstructions: [
+      supplementalInstructions: [
         "Based on the incoming goal and input simply attempt to resolve the goal within your power",
       ],
       // No tools for the Executor agent
@@ -41,7 +41,7 @@ export class HardcodedAgentRepository implements IAgentRepository {
     const distributedLLMScribeProps: ScribeProps = {
       name: "SimpleLLMScribe",
       description: "Splits sub requests for llms to other agents",
-      supllementalInstructions: [
+      supplementalInstructions: [
         "Identify each distinct query needed for llm evaluation, and mark each of those as a distinct action to be evaluated.",
       ],
       agents: [llmExecutionAgent],

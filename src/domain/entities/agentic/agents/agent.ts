@@ -9,6 +9,7 @@ import {
 } from "@aws-sdk/client-bedrock-runtime";
 import { config } from "../../../../shared/config";
 import { ChapterResponseXmlParser } from "../../../../adapters/secondary/xml/xml-execution-agent-output-context-mapper";
+import { logger } from "../../../../shared/monitor";
 
 export interface AgentProps extends BaseAgentProps {
   tools?: Tool[];
@@ -119,7 +120,7 @@ export class Agent extends BaseAgent<AgentProps> {
       );
     }
 
-    console.log(JSON.stringify({ outputContext }));
+    logger.info("Agent Response Parsed", { outputContext });
     return outputContext;
   }
 }

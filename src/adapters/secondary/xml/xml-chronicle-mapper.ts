@@ -2,6 +2,7 @@ import { parseStringPromise } from "xml2js";
 import { Chronicle } from "../../../domain/entities/agentic/chronicles/chronicle";
 import { Chapter } from "../../../domain/entities/agentic/chronicles/chapter";
 import { Agent } from "../../../domain/entities/agentic/agents/agent";
+import { logger } from "../../../shared/monitor";
 
 interface ChronicleXmlMapperOptions {
   agentResolver: (agentName: string) => Agent;
@@ -28,7 +29,7 @@ export class ChronicleXmlMapper {
    */
   public async parseXmlToChronicle(xml: string): Promise<Chronicle> {
     const result = await parseStringPromise(xml, { explicitArray: false });
-    console.log(JSON.stringify(result));
+    logger.info(JSON.stringify(result));
     // The parsed object structure may vary depending on your XML.
     // Assuming:
     // result.chronicle.title
