@@ -10,9 +10,14 @@ interface IConfig {
   environment: "dev" | "prod" | "staging";
   stage: string;
   defaultConverseModelId: string;
+  logLevel: "DEBUG" | "INFO" | "WARN" | "ERROR" | "NONE";
+  tools: {
+    maxExecutionTime: number;
+  };
+  maxChronicleChapters: number;
 }
 
-export const config = convict<IConfig>({
+const config = convict<IConfig>({
   environment: {
     doc: "The application environment.",
     format: ["dev", "prod", "staging"],
@@ -31,4 +36,26 @@ export const config = convict<IConfig>({
     default: "amazon.nova-micro-v1:0",
     env: "DEFAULT_CONVERSE_MODEL_ID",
   },
+  logLevel: {
+    doc: "Minimum log level to output",
+    format: ["DEBUG", "INFO", "WARN", "ERROR", "NONE"],
+    default: "INFO",
+    env: "LOG_LEVEL",
+  },
+  tools: {
+    maxExecutionTime: {
+      doc: "Maximum execution time for tools in milliseconds",
+      format: Number,
+      default: 10000,
+      env: "TOOLS_MAX_EXECUTION_TIME",
+    },
+  },
+  maxChronicleChapters: {
+    doc: "Maximum number of chapters allowed in a chronicle",
+    format: Number,
+    default: 6,
+    env: "MAX_CHRONICLE_CHAPTERS",
+  },
 }).validate({ allowed: "strict" });
+
+export default config;

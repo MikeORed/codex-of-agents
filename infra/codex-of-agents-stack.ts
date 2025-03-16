@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { config } from "./config/config";
+import config from "./config";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as nodeJsFunction from "aws-cdk-lib/aws-lambda-nodejs";
 import * as path from "path";

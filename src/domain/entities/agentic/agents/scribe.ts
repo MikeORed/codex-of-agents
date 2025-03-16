@@ -3,7 +3,7 @@ import { Chronicle } from "../chronicles/chronicle";
 import { Agent } from "./agent";
 import { ChronicleXmlMapper } from "../../../../adapters/secondary/xml/xml-chronicle-mapper";
 import { LlmService } from "../../../services/llm-service/llm-service";
-import { config } from "../../../../shared/config";
+import config from "../../../../shared/config";
 import { ConverseCommandInput } from "@aws-sdk/client-bedrock-runtime";
 
 export interface ScribeProps extends BaseAgentProps {

@@ -7,7 +7,7 @@ import {
   ToolConfiguration,
   Tool as BedrockTool,
 } from "@aws-sdk/client-bedrock-runtime";
-import { config } from "../../../../shared/config";
+import config from "../../../../shared/config";
 import { ChapterResponseXmlParser } from "../../../../adapters/secondary/xml/xml-execution-agent-output-context-mapper";
 import { logger } from "../../../../shared/monitor";
 
