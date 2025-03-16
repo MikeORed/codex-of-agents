@@ -1,10 +1,12 @@
+// src/domain/entities/agentic/tools/sum-tool.ts
 import { DocumentType as __DocumentType } from "@smithy/types";
 import { Tool, ToolProps } from "./tool";
+import { Schema } from "ajv";
 
 export interface SumToolProps extends ToolProps {}
 
 export class SumTool extends Tool {
-  private static staticInputSchema: __DocumentType = {
+  private static readonly staticInputSchema: Schema = {
     type: "object",
     properties: {
       operands: {
@@ -17,25 +19,53 @@ export class SumTool extends Tool {
     additionalProperties: false,
   };
 
+  private static readonly staticOutputSchema: Schema = {
+    type: "object",
+    properties: {
+      sum: { type: "number" },
+      count: { type: "integer" },
+    },
+    required: ["sum", "count"],
+    additionalProperties: false,
+  };
+
   constructor(
-    props: SumToolProps,
+    props: SumToolProps = {
+      name: "sum",
+      description: "Adds a list of numbers and returns the sum",
+      metadata: {
+        version: "1.0.0",
+        author: "Codex of Agents",
+        description: "Adds numeric operands and returns the sum and count",
+        capabilities: ["math", "addition"],
+        tags: ["basic", "math"],
+      },
+    },
     id?: string,
     created?: string,
     updated?: string
   ) {
-    super(props, id, created, updated);
-    this.props.inputSchema = SumTool.staticInputSchema;
+    super(
+      {
+        ...props,
+        inputSchema: SumTool.staticInputSchema,
+        outputSchema: SumTool.staticOutputSchema,
+      },
+      id,
+      created,
+      updated
+    );
   }
 
-  public async execute(input: any): Promise<number> {
-    // Validate input against the schema
-    this.validate(this.props);
-
+  public async executeInternal(input: any): Promise<any> {
     const operands: number[] = input.operands;
 
     // Perform the sum
-    const result = operands.reduce((sum, operand) => sum + operand, 0);
+    const sum = operands.reduce((acc, operand) => acc + operand, 0);
 
-    return result;
+    return {
+      sum,
+      count: operands.length,
+    };
   }
 }
