@@ -1,10 +1,17 @@
 import { BaseAgent, BaseAgentProps } from "./base-agent";
 import { Chronicle } from "../chronicles/chronicle";
 import { Agent } from "./agent";
-import { ChronicleXmlMapper } from "../../../../adapters/secondary/xml/xml-chronicle-mapper";
 import { LlmService } from "../../../services/llm-service/llm-service";
 import config from "../../../../shared/config";
-import { ConverseCommandInput } from "@aws-sdk/client-bedrock-runtime";
+import {
+  ConverseCommandInput,
+  ConverseCommandOutput,
+  ToolConfiguration,
+} from "@aws-sdk/client-bedrock-runtime";
+import { GenerateChronicleToolImpl } from "../tools/generate-chronicle-tool";
+import { JsonChronicleMapper } from "../../../../adapters/secondary/json/json-chronicle-mapper";
+import { logger } from "../../../../shared/monitor";
+import { generateChronicleInputSchema } from "../../../schemas";
 
 export interface ScribeProps extends BaseAgentProps {
   agents: Agent[];
@@ -29,96 +36,125 @@ export class Scribe extends BaseAgent<ScribeProps> {
     return this._chronicle;
   }
 
+  /**
+   * Creates a tool configuration for generating chronicles
+   */
+  private createGenerateChronicleToolConfig(): ToolConfiguration {
+    return {
+      tools: [
+        {
+          toolSpec: {
+            name: "generateChronicle",
+            description: "Generate a chronicle based on a command",
+            inputSchema: {
+              json: generateChronicleInputSchema,
+            },
+          },
+        },
+      ],
+      toolChoice: { tool: { name: "generateChronicle" } },
+    };
+  }
+
+  /**
+   * Generates a system message for the LLM to guide chronicle generation
+   */
   private generateSystemMessage(): string {
     const availableAgents = `Available Agents:\n${this.agents
       .map((agent) => `- ${agent.name}: ${agent.description}`)
       .join("\n")}`;
 
-    const coreInstructions = `Instructions:${
-      this.props.supplementalInstructions &&
-      this.props.supplementalInstructions.length > 0
-        ? this.props.supplementalInstructions.map((ins) => "\n-" + ins).join()
-        : ""
-    }
+    const coreInstructions = `Instructions:
         - Parse the user's prompt and identify all entities and actions involved.
         - For distinct action plan needed, create a Chapter in the Chronicle.
         - Assign the Chapter to the appropriate Agent based on the agent's responsibilities.
-        - If a task requires the outputs of other tasks, mark it as dependent on those Chapters by including their IDs in the <dependencies> section.
+        - If a task requires the outputs of other tasks, mark it as dependent on those Chapters by including their IDs in the dependencies array.
         - Include the goal and the context necessary for the Agent to execute the task.
         - Ensure that each Chapter has a unique ID.
         - The context should contain all relevant details extracted from the user's prompt, formatted for clarity.
-        - Provide your output in the following XML format only, always remember to close the appropriate tags, do not include newlines or tabs, and do not place any formatting in the response not provided below
-        -- For any xml properties which need to be generated, their values must always be in camel case with no spaces`;
-
-    const coreFormat = `Output Format:
-      <chronicle>
-        <chapter id="...">
-          <targetAgent>...</targetAgent>
-          <dependencies>
-            <dependency>...</dependency>
-            <!-- Additional dependencies -->
-          </dependencies>
-          <goal>...</goal>
-          <context>...</context>
-        </chapter>
-        <!-- Additional chapters -->
-      </chronicle>`;
-
-    const minifyRegex = /[\t\r\n]+/g;
-    const collapseSpaces = / {2,}/g;
+        - Use the generateChronicle tool to create a chronicle based on the user's command.`;
 
     return [
       `Your Description: ${this.description}`,
       availableAgents,
-      coreInstructions.replace(minifyRegex, " ").replace(collapseSpaces, " "),
-      coreFormat.replace(minifyRegex, " ").replace(collapseSpaces, " "),
+      coreInstructions,
+      ...this.props.supplementalInstructions,
     ].join("\n\n");
   }
 
+  /**
+   * Generates a chronicle based on a command using tool-based approach
+   */
   public async generateChronicle(
     llmService: LlmService,
     command: string | undefined,
     context: Record<string, any> | undefined
   ): Promise<void> {
-    const chronicleGenerationInput: ConverseCommandInput = {
-      system: [{ text: this.generateSystemMessage() }],
-      modelId: config.get("defaultConverseModelId"),
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              text: `${command}`,
-            },
-          ],
-        },
-      ],
-    };
+    logger.info("Generating chronicle using tool-based approach", { command });
 
-    const chronicleReadResponse = await llmService.execute(
-      chronicleGenerationInput
-    );
+    try {
+      // Use tool configuration with LLM
+      const toolConfig = this.createGenerateChronicleToolConfig();
 
-    const parser = new ChronicleXmlMapper({
-      agentResolver: (agentName: string) => {
-        const agent = this.agents.find((agent) => agent.name === agentName);
-        if (!agent) {
-          throw new Error(`Agent ${agentName} not found.`);
+      const chronicleGenerationInput: ConverseCommandInput = {
+        system: [
+          {
+            text: this.generateSystemMessage(),
+          },
+        ],
+        modelId: config.get("defaultConverseModelId"),
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                text: command || "",
+              },
+            ],
+          },
+        ],
+        toolConfig: toolConfig,
+      };
+
+      const chronicleResponse = await llmService.execute(
+        chronicleGenerationInput
+      );
+
+      // Create the tool instance for converting JSON to Chronicle
+      const generateChronicleTool = new GenerateChronicleToolImpl({
+        name: "generateChronicle",
+        description: "Generate a chronicle based on a command",
+        agents: this.agents,
+      });
+
+      // The AWS SDK types might not have the toolUse property defined yet
+      // Use a type assertion to access it
+      const response = chronicleResponse as any;
+
+      if (response?.output?.toolUse?.output) {
+        // Parse the tool output as JSON
+        const chronicleJson = JSON.parse(response.output.toolUse.output);
+
+        // Convert JSON to Chronicle entity using the tool
+        this._chronicle = await generateChronicleTool.execute(chronicleJson);
+      } else if (chronicleResponse?.output?.message?.content?.[0]?.text) {
+        // Fallback to parsing the message content if tool use is not available
+        try {
+          const chronicleJson = JSON.parse(
+            chronicleResponse.output.message.content[0].text
+          );
+
+          // Convert JSON to Chronicle entity using the tool
+          this._chronicle = await generateChronicleTool.execute(chronicleJson);
+        } catch (error) {
+          throw new Error(`Failed to parse chronicle JSON: ${error}`);
         }
-        return agent;
-      },
-    });
-
-    if (chronicleReadResponse?.output?.message?.content?.[0]?.text) {
-      await parser
-        .parseXmlToChronicle(
-          chronicleReadResponse.output.message.content[0].text
-        )
-        .then((chronicle) => {
-          this._chronicle = chronicle;
-        });
-    } else {
-      throw new Error("No valid content received from LLM response");
+      } else {
+        throw new Error("No valid content received from LLM response");
+      }
+    } catch (error) {
+      logger.error("Error generating chronicle", { error });
+      throw error;
     }
   }
 }
