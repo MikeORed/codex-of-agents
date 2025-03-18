@@ -7,20 +7,32 @@ export const chapterSchema: Schema = {
   type: "object",
   required: ["id", "targetAgent", "goal"],
   properties: {
-    id: { type: "string" },
-    targetAgent: { type: "string" },
-    goal: { type: "string" },
-    dependencies: {
-      type: "array",
-      items: { type: "string" },
+    id: {
+      type: "string",
+      pattern: "^c[0-9]+$",
+      description: "Unique identifier for the chapter (e.g., 'c1')",
+    },
+    targetAgent: {
+      type: "string",
+      description: "The name of the agent that will execute this chapter",
+    },
+    goal: {
+      type: "string",
+      description: "The specific objective for this chapter to accomplish",
     },
     context: {
-      type: "object",
-      additionalProperties: true,
-    },
-    status: {
       type: "string",
-      enum: ["created", "ready", "inProgress", "complete", "failed"],
+      description:
+        "Detailed information needed by the agent to execute this chapter",
+    },
+    dependencies: {
+      type: "array",
+      description:
+        "IDs of chapters that must be completed before this chapter can start",
+      items: {
+        type: "string",
+        pattern: "^c[0-9]+$",
+      },
     },
   },
 };
@@ -32,11 +44,13 @@ export const chronicleSchema: Schema = {
   type: "object",
   required: ["title", "goal", "chapters"],
   properties: {
-    title: { type: "string" },
-    goal: { type: "string" },
-    status: {
+    title: {
       type: "string",
-      enum: ["created", "ready", "inProgress", "complete", "failed"],
+      description: "Title of the chronicle",
+    },
+    goal: {
+      type: "string",
+      description: "Overall goal this chronicle aims to accomplish",
     },
     chapters: {
       type: "array",
@@ -48,17 +62,7 @@ export const chronicleSchema: Schema = {
 /**
  * JSON Schema for the input to the generateChronicle tool
  */
-export const generateChronicleInputSchema: Schema = {
-  type: "object",
-  required: ["command"],
-  properties: {
-    command: { type: "string" },
-    context: {
-      type: "object",
-      additionalProperties: true,
-    },
-  },
-};
+export const generateChronicleInputSchema: Schema = chronicleSchema;
 
 /**
  * JSON Schema for the output of the generateChronicle tool
@@ -70,12 +74,19 @@ export const generateChronicleOutputSchema: Schema = chronicleSchema;
  */
 export const chapterResponseSchema: Schema = {
   type: "object",
-  required: ["directResult", "outputContext"],
   properties: {
-    directResult: { type: "string" },
+    directResult: {
+      type: "string",
+      description: "The main result or finding from this chapter",
+    },
     outputContext: {
       type: "object",
-      additionalProperties: true,
+      description: "Key structured data extracted from the chapter execution",
+      additionalProperties: {
+        type: "string",
+      },
     },
   },
+  required: ["directResult"],
+  additionalProperties: false,
 };

@@ -129,20 +129,18 @@ export class Scribe extends BaseAgent<ScribeProps> {
 
       // The AWS SDK types might not have the toolUse property defined yet
       // Use a type assertion to access it
-      const response = chronicleResponse as any;
+      const chronicleResponseContent =
+        chronicleResponse.output?.message?.content ?? [];
 
-      if (response?.output?.toolUse?.output) {
+      if (chronicleResponseContent?.[0]?.toolUse?.input) {
         // Parse the tool output as JSON
-        const chronicleJson = JSON.parse(response.output.toolUse.output);
-
+        const chronicleJson = chronicleResponseContent[0].toolUse.input;
         // Convert JSON to Chronicle entity using the tool
         this._chronicle = await generateChronicleTool.execute(chronicleJson);
-      } else if (chronicleResponse?.output?.message?.content?.[0]?.text) {
+      } else if (chronicleResponseContent?.[0]?.text) {
         // Fallback to parsing the message content if tool use is not available
         try {
-          const chronicleJson = JSON.parse(
-            chronicleResponse.output.message.content[0].text
-          );
+          const chronicleJson = JSON.parse(chronicleResponseContent[0].text);
 
           // Convert JSON to Chronicle entity using the tool
           this._chronicle = await generateChronicleTool.execute(chronicleJson);
